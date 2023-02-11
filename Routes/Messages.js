@@ -11,10 +11,13 @@ router.get("/messages", (req, res) => {
 
   Conversation.findOne({
     $and: [{ members: user._id }, { members: reciever }],
+    
   }).exec((err, conversation) => {
     if (err) return res.status(500).json({ message: "Internal server error!" });
+
     if (!conversation)
       return res.status(404).json({ message: "No messages found!" });
+
     Message.find({ conversationId: conversation?._id })
       .populate("sender")
       .exec((err, messages) => {
@@ -48,7 +51,7 @@ router.post("/messages", async (req, res) => {
   }
 
   const message = new Message({ conversationId, sender, text, status });
-  await message.populate("sender")
+  await message.populate("sender");
   message.save((err, message) => {
     if (err) return res.status(500).json({ message: "Internal server error!" });
     return res.status(200).json({ message });
