@@ -30,7 +30,8 @@ exports.scoketServer = (app, options, eventsEmitter) => {
   });
 
   eventsEmitter.on("sendmessage", (...args) => {
-    if (clients.find((client) => client.userId === args[1]))
+    const reciever = clients.find((client) => client.userId === args[1]);
+    if (reciever)
       io.to(reciever.socketId).emit("sendmessage", args[0]);
   });
 };

@@ -53,10 +53,8 @@ router.post("/messages", async (req, res) => {
   await message.populate("sender");
   message.save((err, message) => {
     if (err) return res.status(500).json({ message: "Internal server error!" });
-
     const eventEmitter = req.app.get("eventEmitter");
     eventEmitter.emit("sendmessage", message, reciever);
-
     return res.status(200).json({ message });
   });
 });
