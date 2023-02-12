@@ -5,6 +5,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const routes = require("./Routes/index");
+const socket = require("./Socket")
+const http = require("http")
 const app = expresss();
 
 // Configurations
@@ -50,9 +52,11 @@ mongoose
   .catch((err) => console.log("Failed to connect to the database...", err));
 
 // PORT for listening server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
+const server = http.createServer(app)
 // Listening the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is listening at port: ${PORT}`);
+  socket.scoketServer(server, options)
 });
