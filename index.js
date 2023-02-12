@@ -5,8 +5,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const routes = require("./Routes/index");
-const socket = require("./Socket")
-const http = require("http")
+const socket = require("./Socket");
+const Emitter = require("events");
+const http = require("http");
 const app = expresss();
 
 // Configurations
@@ -34,6 +35,10 @@ app.use(
 
 app.use([morgan("tiny"), expresss.json(), cookieParser()]);
 
+// Events emitter
+const eventEmitter = new Emitter();
+app.set("eventEmitter", eventEmitter);
+
 // Routes
 app.use([routes.messages, routes.user]);
 
@@ -54,9 +59,9 @@ mongoose
 // PORT for listening server
 const PORT = process.env.PORT || 4000;
 
-const server = http.createServer(app)
+const server = http.createServer(app);
 // Listening the server
 server.listen(PORT, () => {
   console.log(`Server is listening at port: ${PORT}`);
-  socket.scoketServer(server, options)
+  socket.scoketServer(server, options, eventEmitter);
 });

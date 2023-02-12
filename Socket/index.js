@@ -1,14 +1,14 @@
 const socket = require("socket.io");
 
 const newClient = (clients, userId, socketId) => {
-  return [...clients, { userId, socketId }]
+  return [...clients, { userId, socketId }];
 };
 
 const removeClient = (clients, socketId) => {
   return clients.filter((client) => client.socketId !== socketId);
 };
 
-exports.scoketServer = (app, options) => {
+exports.scoketServer = (app, options, eventsEmitter) => {
   const io = new socket.Server(app, { cors: options });
 
   let clients = [];
@@ -27,5 +27,10 @@ exports.scoketServer = (app, options) => {
       clients = removeClient(clients, socket.id);
       io.emit("active", clients);
     });
+  });
+
+  eventsEmitter.on("sendmessage", (...args) => {
+    if (clients.find((client) => client.userId === args[1]))
+      io.to(reciever.socketId).emit("sendmessage", args[0]);
   });
 };
