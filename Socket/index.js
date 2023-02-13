@@ -20,6 +20,10 @@ exports.scoketServer = (app, options, eventsEmitter) => {
       io.emit("active", clients);
     });
 
+    socket.on("updatestatus", (...args) => {
+      eventsEmitter.emit("updatestatus", args[0], args[1])
+    })
+
     socket.on("logout", () => {
       socket.disconnect();
     });
