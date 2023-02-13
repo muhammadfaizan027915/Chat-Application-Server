@@ -1,4 +1,5 @@
 const socket = require("socket.io");
+const Messages = require("../Models/Messages");
 
 const newClient = (clients, userId, socketId) => {
   return [...clients, { userId, socketId }];
@@ -31,7 +32,20 @@ exports.scoketServer = (app, options, eventsEmitter) => {
 
   eventsEmitter.on("sendmessage", (...args) => {
     const reciever = clients.find((client) => client.userId === args[1]);
-    if (reciever)
-      io.to(reciever.socketId).emit("sendmessage", args[0]);
+    io.to(reciever?.socketId).emit("sendmessage", args[0]);
+  });
+
+  eventsEmitter.on("updatestatus", (...args) => {
+    Messages.updateMany(
+      { conversationId: args[0], sender: args[1], seen: false },
+      { seen: true },
+      { new: true },
+      (err, res) => {
+        if (err) return;
+        const sender = clients.find((client) => client.userId === args[1]);
+        if(res.modifiedCount > 0)
+          io.to(sender?.socketId).emit("updatestatus", args[1]);
+      }
+    );
   });
 };

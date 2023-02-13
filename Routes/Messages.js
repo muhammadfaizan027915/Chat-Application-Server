@@ -4,13 +4,13 @@ const Message = require("../Models/Messages");
 
 router.get("/messages", (req, res) => {
   const user = req.session.user;
-  const { reciever } = req.query;
+  const { sender } = req.query;
 
   if (!user)
     return res.status(400).json({ message: "Failed to get messages!" });
 
   Conversation.findOne({
-    $and: [{ members: user._id }, { members: reciever }],
+    $and: [{ members: user._id }, { members: sender }],
   }).exec((err, conversation) => {
     if (err) return res.status(500).json({ message: "Internal server error!" });
 
@@ -23,6 +23,10 @@ router.get("/messages", (req, res) => {
         if (err) {
           return res.status(500).json({ message: "Internal server error!" });
         }
+
+        const eventEmitter = req.app.get("eventEmitter");
+        eventEmitter.emit("updatestatus", conversation._id, sender);
+
         return res
           .status(200)
           .json({ messages, conversationId: conversation._id });
