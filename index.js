@@ -44,7 +44,7 @@ app.use([routes.messages, routes.user]);
 
 mongoose
   .connect(
-    "mongodb+srv://faizan027915:faizan027915@mern.jsr5rzh.mongodb.net/?retryWrites=true&w=majority",
+    "mongodb+srv://<username>:<password>@mern.jsr5rzh.mongodb.net/?retryWrites=true&w=majority",
     {
       autoIndex: false,
       dbName: "ChatApplication",
