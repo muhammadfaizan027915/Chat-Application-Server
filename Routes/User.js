@@ -1,4 +1,5 @@
 const User = require("../Models/User");
+const bcrypt = require("bcrypt");
 const router = require("express").Router();
 
 router.get("/users", (req, res) => {
@@ -11,27 +12,41 @@ router.get("/users", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  const { username } = req.query;
-  if (!username)
-    return res.status(404).json({ message: "Enter the username!" });
+  const { username, password } = req.query;
+
+  if (!username || !password)
+    return res.status(404).json({ message: "Please fill all the fields!" });
   User.findOne({ username }).exec((err, user) => {
     if (err) return res.status(500).json({ message: "Internal Server Error!" });
-
     if (!user) return res.status(404).json({ message: "User not found!" });
-    req.session.user = user;
-    return res.status(200).json({ user });
+
+    bcrypt.compare(password, user.password, (err, verify) => {
+      if (err)
+        return res.status(500).json({ message: "Internal Server Error!" });
+      if (verify === false)
+        return res.status(403).json({ message: "Wrong username or password!" });
+
+      req.session.user = user;
+      return res.status(200).json({ user });
+    });
   });
 });
 
 router.post("/signup", (req, res) => {
-  const { name, email, username, imagelink } = req.body;
-  if (!username || !email || !name)
+  const { name, email, username, password, imagelink } = req.body;
+  if ((!username || !email || !name, !password))
     return res.status(400).json({ message: "Please fill all the fields!" });
-  const user = new User({ name, email, username, imagelink });
-  user.save((err, user) => {
+
+  bcrypt.hash(password, 10, (err, password) => {
     if (err) return res.status(500).json({ message: "Internal Server Error!" });
-    req.session.user = user;
-    return res.status(200).json({ user });
+
+    const user = new User({ name, email, username, password, imagelink });
+    user.save((err, user) => {
+      if (err)
+        return res.status(500).json({ message: "Internal Server Error!" });
+      req.session.user = user;
+      return res.status(200).json({ user });
+    });
   });
 });
 
